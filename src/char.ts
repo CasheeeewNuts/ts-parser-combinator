@@ -2,6 +2,7 @@ import {anyChar} from "./primitives";
 import type {Parser, ParserInput} from "./types";
 
 type CharFunc = <T extends ParserInput[0]>(c: T) => Parser<T>;
+type IsFunc = <T extends string>(f: (c: ParserInput[0]) => c is T) => Parser<T>
 
 export const char: CharFunc = c => input => {
     const r = anyChar(input);
@@ -16,6 +17,23 @@ export const char: CharFunc = c => input => {
     return {
         result: 'success',
         data: c,
+        rest: r.rest
+    }
+}
+
+export const is: IsFunc = f => input => {
+    const r = anyChar(input);
+
+    if (r.result === 'fail') return r;
+    if (!f(r.data)) {
+        return {
+            result: 'fail'
+        }
+    }
+
+    return {
+        result: 'success',
+        data: r.data,
         rest: r.rest
     }
 }
